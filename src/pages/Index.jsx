@@ -86,10 +86,13 @@ const Index = () => {
             <span className="font-serif text-xl font-semibold text-foreground">DCFM</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
-            <a href="#submit-case" className="text-muted-foreground hover:text-foreground transition-colors">Submit Case</a>
-            <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
-            <a href="#impact" className="text-muted-foreground hover:text-foreground transition-colors">Impact</a>
+            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Home</a>
+            <a href="#submit-case" className="text-muted-foreground hover:text-foreground transition-colors">Case</a>
+            <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">Schedule</a>
+            <a href="#impact" className="text-muted-foreground hover:text-foreground transition-colors">Analytics</a>
+            <a href="#parties" className="text-muted-foreground hover:text-foreground transition-colors">
+            Parties</a>
+            <a href="#dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</a>
           </div>
           <button className="bg-primary text-primary-foreground px-5 py-2.5 rounded-md font-medium hover:opacity-90 transition-opacity">
             Get Started
