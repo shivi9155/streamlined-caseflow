@@ -1,6 +1,44 @@
-import { Scale, Clock, Users, FileText, ArrowRight, CheckCircle, BarChart3, Shield, Zap } from "lucide-react";
+import { useState } from "react";
+import { Scale, Clock, Users, FileText, ArrowRight, CheckCircle, Shield, Zap, ChevronDown, Send } from "lucide-react";
 
 const Index = () => {
+  const [formData, setFormData] = useState({
+    caseType: "",
+    priority: "",
+    title: "",
+    description: "",
+    parties: ""
+  });
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isPriorityOpen, setIsPriorityOpen] = useState(false);
+
+  const caseTypes = [
+    "Civil Case",
+    "Criminal Case",
+    "Family Case",
+    "Commercial Case",
+    "Labor Case",
+    "Administrative Case"
+  ];
+
+  const priorities = [
+    { value: "high", label: "High Priority", color: "bg-red-500" },
+    { value: "medium", label: "Medium Priority", color: "bg-yellow-500" },
+    { value: "low", label: "Low Priority", color: "bg-green-500" }
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (formData.caseType && formData.priority && formData.title && formData.description) {
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({ caseType: "", priority: "", title: "", description: "", parties: "" });
+      }, 3000);
+    }
+  };
+
   const features = [
     {
       icon: Scale,
@@ -49,6 +87,7 @@ const Index = () => {
           </div>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
+            <a href="#submit-case" className="text-muted-foreground hover:text-foreground transition-colors">Submit Case</a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">How It Works</a>
             <a href="#impact" className="text-muted-foreground hover:text-foreground transition-colors">Impact</a>
           </div>
@@ -202,6 +241,171 @@ const Index = () => {
                 <p className="text-muted-foreground font-medium">{stat.label}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Case Submission Form */}
+      <section id="submit-case" className="section-padding bg-secondary">
+        <div className="container-width">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4">
+                Submit a New Case
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                Register your case for efficient processing through our DCFM system
+              </p>
+            </div>
+
+            {isSubmitted ? (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center animate-fade-in">
+                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <h3 className="font-serif text-2xl font-semibold text-green-800 mb-2">
+                  Case Submitted Successfully!
+                </h3>
+                <p className="text-green-600">
+                  Your case has been registered and will be processed according to DCFM guidelines.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="bg-card rounded-xl p-8 shadow-lg border border-border">
+                <div className="space-y-6">
+                  {/* Case Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Case Title *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      placeholder="Enter case title"
+                      className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                      required
+                    />
+                  </div>
+
+                  {/* Case Type Dropdown */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Case Type *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsDropdownOpen(!isDropdownOpen);
+                        setIsPriorityOpen(false);
+                      }}
+                      className="w-full px-4 py-3 rounded-lg border border-border bg-background text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    >
+                      <span className={formData.caseType ? "text-foreground" : "text-muted-foreground"}>
+                        {formData.caseType || "Select case type"}
+                      </span>
+                      <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    {isDropdownOpen && (
+                      <div className="absolute z-50 w-full mt-2 bg-card border border-border rounded-lg shadow-lg">
+                        {caseTypes.map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => {
+                              setFormData({ ...formData, caseType: type });
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full px-4 py-3 text-left text-foreground hover:bg-secondary transition-colors first:rounded-t-lg last:rounded-b-lg"
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Priority Dropdown */}
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Priority Level *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsPriorityOpen(!isPriorityOpen);
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full px-4 py-3 rounded-lg border border-border bg-background text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        {formData.priority && (
+                          <span className={`w-3 h-3 rounded-full ${priorities.find(p => p.value === formData.priority)?.color}`}></span>
+                        )}
+                        <span className={formData.priority ? "text-foreground" : "text-muted-foreground"}>
+                          {priorities.find(p => p.value === formData.priority)?.label || "Select priority"}
+                        </span>
+                      </span>
+                      <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${isPriorityOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    {isPriorityOpen && (
+                      <div className="absolute z-50 w-full mt-2 bg-card border border-border rounded-lg shadow-lg">
+                        {priorities.map((priority) => (
+                          <button
+                            key={priority.value}
+                            type="button"
+                            onClick={() => {
+                              setFormData({ ...formData, priority: priority.value });
+                              setIsPriorityOpen(false);
+                            }}
+                            className="w-full px-4 py-3 text-left text-foreground hover:bg-secondary transition-colors first:rounded-t-lg last:rounded-b-lg flex items-center gap-2"
+                          >
+                            <span className={`w-3 h-3 rounded-full ${priority.color}`}></span>
+                            {priority.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Parties Involved */}
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Parties Involved
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.parties}
+                      onChange={(e) => setFormData({ ...formData, parties: e.target.value })}
+                      placeholder="e.g., Plaintiff vs Defendant"
+                      className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Case Description *
+                    </label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Provide details about the case..."
+                      rows={4}
+                      className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none"
+                      required
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                  >
+                    <Send className="w-5 h-5" />
+                    Submit Case
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </section>
