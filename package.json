@@ -45,11 +45,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
-<<<<<<< HEAD
-    "framer-motion": "^12.23.26",
-=======
-    "express": "^5.2.1",
->>>>>>> dca6c2f92513fdbda6d53b742655272b70a808bf
+
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
