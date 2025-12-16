@@ -159,13 +159,13 @@ const Home = () => {
                   to="/cases"
                   className="px-8 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl flex items-center group"
                 >
-                  First Consultation
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <button className="px-8 py-3.5 border-2 border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center">
+                {/* <button className="px-8 py-3.5 border-2 border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center">
                   <Play className="h-5 w-5 mr-2" />
                   Watch Video
-                </button>
+                </button> */}
               </div>
             </div>
             
@@ -259,13 +259,13 @@ const Home = () => {
                 </div>
               </div>
               <div className="flex gap-4">
-                <Link
+                {/* <Link
                   to="/cases"
                   className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl flex items-center"
                 >
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+                </Link> */}
                 <button className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
                   Learn More
                 </button>

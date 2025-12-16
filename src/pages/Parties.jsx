@@ -1,4 +1,4 @@
-import DashboardLayout from "../layouts/DashboardLayout";
+import DashboardLayout from "../Layouts/DashboardLayout";
 
 const parties = [
   { name: "Robert Smith", type: "Individual", cases: 1 },

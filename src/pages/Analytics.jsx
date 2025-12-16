@@ -1,4 +1,4 @@
-import DashboardLayout from "../layouts/DashboardLayout";
+import DashboardLayout from "../Layouts/DashboardLayout";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
