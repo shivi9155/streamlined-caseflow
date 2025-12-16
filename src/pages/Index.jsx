@@ -1,4 +1,5 @@
 import { useState } from "react";
+import {Link} from "react-router-dom";
 import { Scale, Clock, Users, FileText, ArrowRight, CheckCircle, Shield, Zap, ChevronDown, Send } from "lucide-react";
 
 const Index = () => {
@@ -89,8 +90,8 @@ const Index = () => {
             <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Home</a>
             <a href="#submit-case" className="text-muted-foreground hover:text-foreground transition-colors">Case</a>
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">Schedule</a>
-            <a href="#impact" className="text-muted-foreground hover:text-foreground transition-colors">Analytics</a>
-            <a href="#parties" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="/Analytics" className="text-muted-foreground hover:text-foreground transition-colors">Analytics</a>
+            <a href="/Parties" className="text-muted-foreground hover:text-foreground transition-colors">
             Parties</a>
             <a href="#dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</a>
           </div>

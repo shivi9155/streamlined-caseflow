@@ -4,6 +4,23 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
 
+
+
+body {
+  background-color: #F8FAFC;
+  font-family: 'Inter', sans-serif;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+
+
+
 @layer base {
   :root {
     --background: 210 20% 98%;
