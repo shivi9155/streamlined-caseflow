@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Home from './pages/Home';
 import CaseManagement from './pages/CaseManagement';
 import Layout from './components/Layout';
+import Analytics from "./pages/analytics";
+import Parties from "./pages/parties";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -22,6 +24,8 @@ function App() {
             </Layout>
           } />
           <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/analytics" element={<Analytics />} />
+            <Route path="/parties" element={<Parties />} />
         </Routes>
       </div>
     </Router>

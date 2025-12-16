@@ -104,10 +104,10 @@ const Home = () => {
               <a href="#" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
                 Schedule
               </a>
-              <a href="#" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
+              <a href="/Analytics" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
                 Analytics
               </a>
-              <a href="#" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
+              <a href="/Parties" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
                 Parties
               </a>
               <a href="#" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
