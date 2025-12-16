@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Home from './pages/Home';
 import CaseManagement from './pages/CaseManagement';
 import Layout from './components/Layout';
-import Analytics from "./pages/analytics";
+import Analytics from "./pages/Analytics";
 import Parties from "./pages/parties";
+// import LearnM from "./LearnMore/learnM";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);

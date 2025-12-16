@@ -266,9 +266,15 @@ const Home = () => {
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link> */}
-                <button className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
+                {/* <button className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
                   Learn More
-                </button>
+                </button> */}
+
+                 {/* </Link> */}
+  
+            <Link to="/LearnMore/learnM" className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
+            Learn More
+  </Link>
               </div>
             </div>
 
