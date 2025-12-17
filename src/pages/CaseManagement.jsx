@@ -214,7 +214,7 @@ const CaseManagement = () => {
                 Cases
               </Link>
               <a 
-                href="#" 
+                href="SchedulePage" 
                 className={`font-medium transition-colors pb-1 ${
                   activeNav === "schedule" 
                     ? "text-blue-700 font-semibold border-b-2 border-blue-600" 
@@ -225,7 +225,7 @@ const CaseManagement = () => {
                 Schedule
               </a>
               <a 
-                href="#" 
+                href="/analytics" 
                 className={`font-medium transition-colors pb-1 ${
                   activeNav === "analytics" 
                     ? "text-blue-700 font-semibold border-b-2 border-blue-600" 
@@ -236,7 +236,7 @@ const CaseManagement = () => {
                 Analytics
               </a>
               <a 
-                href="#" 
+                href="/parties" 
                 className={`font-medium transition-colors pb-1 ${
                   activeNav === "parties" 
                     ? "text-blue-700 font-semibold border-b-2 border-blue-600" 

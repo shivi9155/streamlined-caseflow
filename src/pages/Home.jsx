@@ -101,7 +101,7 @@ const Home = () => {
               <Link to="/cases" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
                 Cases
               </Link>
-              <a href="#" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
+              <a href="/schedulepage" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
                 Schedule
               </a>
               <a href="/Analytics" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
