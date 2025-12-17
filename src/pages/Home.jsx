@@ -156,7 +156,7 @@ const Home = () => {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link
-                  to="/cases"
+                  to="/auth"
                   className="px-8 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl flex items-center group"
                 >
                   Get Started
