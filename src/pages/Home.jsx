@@ -1,7 +1,6 @@
-
-
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar'; // Added import
 import { 
   Scale, 
   FileText, 
@@ -83,51 +82,8 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Bar */}
-      <nav className="fixed w-full bg-white/95 backdrop-blur-sm z-50 border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20 items-center">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-blue-100 to-blue-200">
-                <Scale className="h-6 w-6 text-blue-600" />
-              </div>
-              <span className="text-2xl font-bold text-blue-700">DCFM</span>
-            </div>
-            
-            <div className="hidden lg:flex items-center space-x-8">
-              <Link to="/" className="text-blue-700 font-semibold hover:text-blue-600 transition-colors border-b-2 border-blue-600 pb-1">
-                Home
-              </Link>
-              <Link to="/cases" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
-                Cases
-              </Link>
-              <a href="#" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
-                Schedule
-              </a>
-              <a href="/Analytics" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
-                Analytics
-              </a>
-              <a href="/Parties" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
-                Parties
-              </a>
-              <a href="#" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
-                Dashboard
-              </a>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <button className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl">
-                Admin Portal
-              </button>
-              <button className="lg:hidden">
-                <svg className="h-6 w-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* Navigation Bar - Replaced with shared component */}
+      <Navbar />
 
       {/* Hero Section with Lighter Colors */}
       <div className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
@@ -162,10 +118,6 @@ const Home = () => {
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                {/* <button className="px-8 py-3.5 border-2 border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center">
-                  <Play className="h-5 w-5 mr-2" />
-                  Watch Video
-                </button> */}
               </div>
             </div>
             
@@ -259,22 +211,9 @@ const Home = () => {
                 </div>
               </div>
               <div className="flex gap-4">
-                {/* <Link
-                  to="/cases"
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl flex items-center"
-                >
-                  Get Started
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link> */}
-                {/* <button className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
+                <Link to="/LearnMore/learnM" className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
                   Learn More
-                </button> */}
-
-                 {/* </Link> */}
-  
-            <Link to="/LearnMore/learnM" className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
-            Learn More
-  </Link>
+                </Link>
               </div>
             </div>
 

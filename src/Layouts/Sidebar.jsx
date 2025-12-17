@@ -1,49 +1,91 @@
-import { motion } from "framer-motion";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  Home,
+  BarChart3,
+  Users,
+  Briefcase,
+  Calendar,
+  Settings,
+  LogOut,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
 
-const MainLayout = ({ title, subtitle, children }) => {
+const Sidebar = ({ active }) => {
+  const menuItems = [
+    { path: '/', label: 'Dashboard', icon: <Home size={20} /> },
+    { path: '/cases', label: 'Cases', icon: <Briefcase size={20} /> },
+    { path: '/schedule', label: 'Schedule', icon: <Calendar size={20} /> },
+    { path: '/analytics', label: 'Analytics', icon: <BarChart3 size={20} /> },
+    { path: '/parties', label: 'Parties', icon: <Users size={20} /> },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-indigo-100">
-
-      {/* Navbar */}
-      <nav className="bg-white/70 backdrop-blur-lg border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-900 tracking-wide">
-            ⚖️ DCFM
-          </h1>
-
-          <div className="hidden md:flex gap-8 text-gray-700 font-medium">
-            <a href="/" className="hover:text-blue-800 transition">Home</a>
-            <a href="/analytics" className="hover:text-blue-800 transition">Analytics</a>
-            <a href="/parties" className="hover:text-blue-800 transition">Parties</a>
+    <div className="hidden lg:flex flex-col w-64 border-r border-gray-200 bg-white">
+      {/* Sidebar Header */}
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+            <span className="text-white font-bold text-lg">D</span>
           </div>
+          <div>
+            <h2 className="font-bold text-gray-900">DCFM Admin</h2>
+            <p className="text-xs text-gray-500">Court Management</p>
+          </div>
+        </div>
+      </div>
 
-          <button className="bg-gradient-to-r from-blue-700 to-indigo-700 text-white px-5 py-2 rounded-xl shadow-md hover:scale-105 transition">
-            Admin Portal
+      {/* Navigation */}
+      <nav className="flex-1 p-4">
+        <div className="space-y-2">
+          {menuItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                active === item.label 
+                  ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600' 
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+              }`}
+            >
+              {item.icon}
+              <span className="font-medium">{item.label}</span>
+            </Link>
+          ))}
+        </div>
+
+        {/* Settings Section */}
+        <div className="mt-8 pt-8 border-t border-gray-200">
+          <Link
+            to="/settings"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+          >
+            <Settings size={20} />
+            <span className="font-medium">Settings</span>
+          </Link>
+          
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-red-600 transition-colors mt-2">
+            <LogOut size={20} />
+            <span className="font-medium">Logout</span>
           </button>
         </div>
       </nav>
 
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="max-w-7xl mx-auto px-6 pt-20 pb-12"
-      >
-        <h2 className="text-5xl font-bold text-blue-900">
-          {title}
-        </h2>
-        <p className="text-gray-600 mt-4 max-w-2xl text-lg">
-          {subtitle}
-        </p>
-      </motion.header>
-
-      {/* Content */}
-      <main className="max-w-7xl mx-auto px-6 pb-20">
-        {children}
-      </main>
+      {/* User Profile */}
+      <div className="p-4 border-t border-gray-200">
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 flex items-center justify-center">
+            <span className="text-white text-sm font-bold">A</span>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-900">Admin User</p>
+            <p className="text-xs text-gray-500">Administrator</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default MainLayout;
+export default Sidebar;
