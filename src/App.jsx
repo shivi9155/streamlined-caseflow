@@ -6,7 +6,9 @@ import Layout from "./components/Layout";
 import Analytics from "./pages/Analytics";
 import Parties from "./pages/Parties";
 import Authpage from "./pages/Authpage";
-import SchedulePage from "./pages/SchedulePage"; // Import the SchedulePage
+import SchedulePage from "./pages/SchedulePage";
+// import LearnMore from "./pages/LearnMore";
+import Dashboard from "./pages/Dashboard"; // Add this import
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -54,15 +56,26 @@ function App() {
             }
           />
 
-          {/* NEW: Schedule Page Route */}
           <Route
-            path="/schedulepage"
+            path="/schedule"
             element={
               <Layout darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
                 <SchedulePage />
               </Layout>
             }
           />
+
+          {/* Dashboard route (has its own navbar) */}
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
+
+          {/* Learn More route (has its own navbar) */}
+          {/* <Route
+            path="/learn-more"
+            element={<LearnMore />}
+          /> */}
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

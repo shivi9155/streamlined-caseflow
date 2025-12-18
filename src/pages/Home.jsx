@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -29,7 +27,11 @@ import {
   Linkedin,
   Instagram,
   Play,
-  Search
+  Search,
+  Home as HomeIcon,
+  Folder,
+  BarChart3,
+  Users as UsersIcon
 } from 'lucide-react';
 
 const Home = () => {
@@ -96,29 +98,35 @@ const Home = () => {
             
             <div className="hidden lg:flex items-center space-x-8">
               <Link to="/" className="text-blue-700 font-semibold hover:text-blue-600 transition-colors border-b-2 border-blue-600 pb-1">
+                <HomeIcon className="inline h-4 w-4 mr-1" />
                 Home
               </Link>
-              <Link to="/cases" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
+              <Link to="/cases" className="text-gray-700 font-medium hover:text-blue-600 transition-colors flex items-center">
+                <Folder className="inline h-4 w-4 mr-1" />
                 Cases
               </Link>
-              <a href="/schedulepage" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
+              <Link to="/schedule" className="text-gray-700 font-medium hover:text-blue-600 transition-colors flex items-center">
+                <Calendar className="inline h-4 w-4 mr-1" />
                 Schedule
-              </a>
-              <a href="/Analytics" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
+              </Link>
+              <Link to="/analytics" className="text-gray-700 font-medium hover:text-blue-600 transition-colors flex items-center">
+                <BarChart3 className="inline h-4 w-4 mr-1" />
                 Analytics
-              </a>
-              <a href="/Parties" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
+              </Link>
+              <Link to="/parties" className="text-gray-700 font-medium hover:text-blue-600 transition-colors flex items-center">
+                <UsersIcon className="inline h-4 w-4 mr-1" />
                 Parties
-              </a>
-              <a href="#" className="text-gray-700 font-medium hover:text-blue-600 transition-colors">
+              </Link>
+              <Link to="/dashboard" className="text-gray-700 font-medium hover:text-blue-600 transition-colors flex items-center">
+                <BookOpen className="inline h-4 w-4 mr-1" />
                 Dashboard
-              </a>
+              </Link>
             </div>
 
             <div className="flex items-center space-x-4">
-              <button className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl">
+              <Link to="/auth" className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl">
                 Admin Portal
-              </button>
+              </Link>
               <button className="lg:hidden">
                 <svg className="h-6 w-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -162,10 +170,13 @@ const Home = () => {
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                {/* <button className="px-8 py-3.5 border-2 border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center">
+                <Link
+                  to="/learn-more"
+                  className="px-8 py-3.5 border-2 border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center"
+                >
                   <Play className="h-5 w-5 mr-2" />
-                  Watch Video
-                </button> */}
+                  Learn More
+                </Link>
               </div>
             </div>
             
@@ -220,7 +231,7 @@ const Home = () => {
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">{service.title}</h3>
                 <p className="text-gray-600 mb-6">{service.description}</p>
                 <Link 
-                  to={service.title === 'Financial Analysis' ? '/cases' : '#'}
+                  to={service.title === 'Financial Analysis' ? '/learn-more' : '#'}
                   className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700 group"
                 >
                   Learn More
@@ -259,22 +270,19 @@ const Home = () => {
                 </div>
               </div>
               <div className="flex gap-4">
-                {/* <Link
-                  to="/cases"
+                <Link
+                  to="/auth"
                   className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl flex items-center"
                 >
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Link> */}
-                {/* <button className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
+                </Link>
+                <Link 
+                  to="/LearnMore" 
+                  className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors"
+                >
                   Learn More
-                </button> */}
-
-                 {/* </Link> */}
-  
-            <Link to="/LearnMore/learnM" className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors">
-            Learn More
-  </Link>
+                </Link>
               </div>
             </div>
 
@@ -328,9 +336,9 @@ const Home = () => {
                     </div>
                   </div>
                   <div className="px-6 pb-6">
-                    <button className="w-full py-2 text-blue-600 font-medium hover:text-blue-700 text-sm">
+                    <Link to="/learn-more" className="w-full py-2 text-blue-600 font-medium hover:text-blue-700 text-sm block text-center">
                       View Profile →
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -384,15 +392,18 @@ const Home = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/cases"
+              to="/auth"
               className="px-8 py-3.5 bg-white text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center shadow-lg hover:shadow-xl"
             >
-              Start Managing Cases
+              Get Started Now
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
-            <button className="px-8 py-3.5 border-2 border-white text-white font-medium rounded-lg hover:bg-white/10 transition-colors">
-              Request Demo
-            </button>
+            <Link
+              to="/learn-more"
+              className="px-8 py-3.5 border-2 border-white text-white font-medium rounded-lg hover:bg-white/10 transition-colors"
+            >
+              Learn More
+            </Link>
           </div>
         </div>
       </div>
@@ -427,20 +438,20 @@ const Home = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Product</h3>
               <ul className="space-y-3">
-                <li><a href="#" className="text-blue-200 hover:text-white">Features</a></li>
+                <li><Link to="/learn-more" className="text-blue-200 hover:text-white">Features</Link></li>
                 <li><Link to="/cases" className="text-blue-200 hover:text-white">Case Management</Link></li>
-                <li><a href="#" className="text-blue-200 hover:text-white">Pricing</a></li>
-                <li><a href="#" className="text-blue-200 hover:text-white">API</a></li>
+                <li><Link to="/schedule" className="text-blue-200 hover:text-white">Schedule</Link></li>
+                <li><Link to="/analytics" className="text-blue-200 hover:text-white">Analytics</Link></li>
               </ul>
             </div>
             
             <div>
               <h3 className="text-lg font-semibold mb-4">Resources</h3>
               <ul className="space-y-3">
-                <li><a href="#" className="text-blue-200 hover:text-white">Documentation</a></li>
-                <li><a href="#" className="text-blue-200 hover:text-white">Help Center</a></li>
-                <li><a href="#" className="text-blue-200 hover:text-white">Blog</a></li>
-                <li><a href="#" className="text-blue-200 hover:text-white">Support</a></li>
+                <li><Link to="/learn-more" className="text-blue-200 hover:text-white">Documentation</Link></li>
+                <li><Link to="/learn-more" className="text-blue-200 hover:text-white">Help Center</Link></li>
+                <li><Link to="/learn-more" className="text-blue-200 hover:text-white">Blog</Link></li>
+                <li><Link to="/learn-more" className="text-blue-200 hover:text-white">Support</Link></li>
               </ul>
             </div>
             
