@@ -97,7 +97,7 @@ const Home = () => {
             </div>
             
             <div className="hidden lg:flex items-center space-x-8">
-              <Link to="/" className="text-blue-700 font-semibold hover:text-blue-600 transition-colors border-b-2 border-blue-600 pb-1">
+              <Link to="/home" className="text-blue-700 font-semibold hover:text-blue-600 transition-colors border-b-2 border-blue-600 pb-1">
                 <HomeIcon className="inline h-4 w-4 mr-1" />
                 Home
               </Link>
@@ -124,7 +124,7 @@ const Home = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <Link to="/auth" className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl">
+              <Link to="/" className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl">
                 Admin Portal
               </Link>
               <button className="lg:hidden">
@@ -164,7 +164,7 @@ const Home = () => {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link
-                  to="/auth"
+                  to="/"
                   className="px-8 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl flex items-center group"
                 >
                   Get Started
@@ -271,18 +271,18 @@ const Home = () => {
               </div>
               <div className="flex gap-4">
                 <Link
-                  to="/auth"
+                  to="/"
                   className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl flex items-center"
                 >
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
-                <Link 
+                {/* <Link 
                   to="/LearnMore" 
                   className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors"
                 >
                   Learn More
-                </Link>
+                </Link> */}
               </div>
             </div>
 

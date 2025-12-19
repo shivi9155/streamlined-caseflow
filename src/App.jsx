@@ -22,11 +22,11 @@ function App() {
       <div className={darkMode ? "dark" : ""}>
         <Routes>
           <Route
-            path="/"
+            path="/home"
             element={<Home darkMode={darkMode} toggleDarkMode={toggleDarkMode} />}
           />
 
-          <Route path="/auth" element={<Authpage />} />
+          <Route path="/" element={<Authpage />} />
 
           {/* Protected routes with Layout wrapper */}
           <Route
