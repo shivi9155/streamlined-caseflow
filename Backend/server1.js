@@ -102,6 +102,33 @@ app.post('/api/cases/create', async (req, res) => {
     res.status(500).json({ message: "Error saving case", error: error.message });
   }
 });
+/** 1. DELETE A CASE (AND ITS PARTIES) **/
+app.delete('/api/cases/:id', async (req, res) => {
+  try {
+    const deletedCase = await Case.findByIdAndDelete(req.params.id);
+    if (!deletedCase) {
+      return res.status(404).json({ message: "Case not found" });
+    }
+    res.json({ message: "Case and associated parties removed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting case", error: error.message });
+  }
+});
+
+/** 2. UPDATE PARTY DETAILS (Optional but Recommended) **/
+// This allows you to update specific fields like phone or email
+app.put('/api/cases/:id', async (req, res) => {
+  try {
+    const updatedCase = await Case.findByIdAndUpdate(
+      req.params.id, 
+      req.body, 
+      { new: true } // returns the updated document
+    );
+    res.json(updatedCase);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating case details", error: error.message });
+  }
+});
 
 // Fetch all cases
 app.get('/api/cases', async (req, res) => {
