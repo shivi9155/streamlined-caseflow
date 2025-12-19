@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
 import { 
   Home,
   BarChart3,
@@ -13,6 +13,16 @@ import {
 } from 'lucide-react';
 
 const Sidebar = ({ active }) => {
+  const navigate = useNavigate(); // Initialize navigation hook
+
+  const handleLogout = () => {
+    // You can add logout logic here (clear tokens, user data, etc.)
+    // For example: localStorage.removeItem('token');
+    
+    // Navigate to home page
+    navigate('/');
+  };
+
   const menuItems = [
     { path: '/', label: 'Dashboard', icon: <Home size={20} /> },
     { path: '/cases', label: 'Cases', icon: <Briefcase size={20} /> },
@@ -65,7 +75,10 @@ const Sidebar = ({ active }) => {
             <span className="font-medium">Settings</span>
           </Link>
           
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-red-600 transition-colors mt-2">
+          <button 
+            onClick={handleLogout} // Added onClick handler
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-red-600 transition-colors mt-2"
+          >
             <LogOut size={20} />
             <span className="font-medium">Logout</span>
           </button>
