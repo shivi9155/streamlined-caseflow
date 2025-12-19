@@ -170,13 +170,13 @@ const Home = () => {
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                {/* <Link
-                  to="/learn-more"
+                <Link
+                  to="/learn"
                   className="px-8 py-3.5 border-2 border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center"
                 >
                   <Play className="h-5 w-5 mr-2" />
                   Learn More
-                </Link> */}
+                </Link>
               </div>
             </div>
             
@@ -277,12 +277,12 @@ const Home = () => {
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
-                {/* <Link 
+                <Link 
                   to="/LearnMore" 
                   className="px-6 py-3 border border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors"
                 >
                   Learn More
-                </Link> */}
+                </Link>
               </div>
             </div>
 

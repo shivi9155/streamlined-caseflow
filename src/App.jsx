@@ -7,7 +7,7 @@ import Analytics from "./pages/Analytics";
 import Parties from "./pages/Parties";
 import Authpage from "./pages/Authpage";
 import SchedulePage from "./pages/SchedulePage";
-// import LearnMore from "./pages/LearnMore";
+import Learn from "./pages/Learn";
 import Dashboard from "./pages/Dashboard"; // Add this import
 
 function App() {
@@ -69,6 +69,10 @@ function App() {
           <Route
             path="/dashboard"
             element={<Dashboard />}
+          />
+           <Route
+            path="/learn"
+            element={<Learn />}
           />
 
           {/* Learn More route (has its own navbar) */}
