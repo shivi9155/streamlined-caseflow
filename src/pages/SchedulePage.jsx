@@ -3,845 +3,294 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import Navbar from '../components/Navbar';
-import {
-  CalendarIcon,
-  ClockIcon,
+import { 
+  XMarkIcon, 
+  PlusIcon, 
+  TrashIcon, 
+  CalendarIcon, 
+  ClockIcon, 
   UserIcon,
-  BuildingLibraryIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  FunnelIcon,
-  XMarkIcon,
-  PlusIcon,
-  DocumentTextIcon,
-  UserGroupIcon,
-  TagIcon,
+  ScaleIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 
 const localizer = momentLocalizer(moment);
 
 const SchedulePage = () => {
   const [events, setEvents] = useState([]);
+  const [availableCases, setAvailableCases] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false);
   const [view, setView] = useState('month');
   const [date, setDate] = useState(new Date());
-  const [filter, setFilter] = useState({
-    judge: '',
-    caseType: '',
-    priority: '',
-    status: '',
-  });
 
-  // Initialize newEvent properly
   const [newEvent, setNewEvent] = useState({
     title: '',
     caseId: '',
     start: new Date(),
-    end: new Date(Date.now() + 2 * 60 * 60 * 1000),
+    end: new Date(Date.now() + 60 * 60 * 1000),
     judge: '',
-    parties: '',
-    caseType: '',
     priority: 'Medium',
     status: 'Scheduled',
-    courtroom: '',
+    parties: '', 
     description: '',
   });
 
-  const judges = [
-    'Justice Sharma',
-    'Justice Verma',
-    'Justice Patel',
-    'Justice Singh',
-    'Justice Reddy',
-    'Justice Mehta',
-  ];
-
-  const caseTypes = [
-    'Civil',
-    'Criminal',
-    'Commercial',
-    'Family',
-    'Constitutional',
-    'Arbitration',
-    'Tax',
-    'Labour',
-  ];
-
-  const priorities = ['High', 'Medium', 'Low'];
-  const statuses = ['Scheduled', 'Hearing', 'Arguments', 'Mediation', 'Completed', 'Adjourned'];
-
-  // Mock events data
-  const mockEvents = [
-    {
-      id: 1,
-      title: 'State vs. Kumar - Final Hearing',
-      start: new Date(2025, 11, 17, 10, 0),
-      end: new Date(2025, 11, 17, 12, 0),
-      caseId: 'CR/2025/123',
-      judge: 'Justice Sharma',
-      parties: ['State of UP', 'Rajesh Kumar'],
-      caseType: 'Criminal',
-      priority: 'High',
-      status: 'Hearing',
-      courtroom: 'Courtroom 3',
-      description: 'Final arguments in murder case',
-    },
-    {
-      id: 2,
-      title: 'M/s ABC Ltd vs. XYZ Corp',
-      start: new Date(2025, 11, 18, 14, 0),
-      end: new Date(2025, 11, 18, 16, 0),
-      caseId: 'COM/2025/456',
-      judge: 'Justice Patel',
-      parties: ['ABC Limited', 'XYZ Corporation'],
-      caseType: 'Commercial',
-      priority: 'Medium',
-      status: 'Arguments',
-      courtroom: 'Courtroom 1',
-      description: 'Commercial dispute - contract breach',
-    },
-    {
-      id: 3,
-      title: 'Matrimonial Petition - Sharma',
-      start: new Date(2025, 11, 19, 11, 0),
-      end: new Date(2025, 11, 19, 13, 0),
-      caseId: 'FA/2025/789',
-      judge: 'Justice Verma',
-      parties: ['Ramesh Sharma', 'Priya Sharma'],
-      caseType: 'Family',
-      priority: 'Medium',
-      status: 'Mediation',
-      courtroom: 'Chamber 2',
-      description: 'Divorce proceedings - settlement discussion',
-    },
-    {
-      id: 4,
-      title: 'Property Dispute - Singhania',
-      start: new Date(2025, 11, 20, 9, 30),
-      end: new Date(2025, 11, 20, 11, 0),
-      caseId: 'CIV/2025/234',
-      judge: 'Justice Singh',
-      parties: ['Ravi Singhania', 'Sunita Gupta'],
-      caseType: 'Civil',
-      priority: 'Low',
-      status: 'Scheduled',
-      courtroom: 'Courtroom 2',
-      description: 'Property partition dispute',
-    },
-  ];
+  const judges = ['Justice Sharma', 'Justice Verma', 'Justice Patel', 'Justice Singh'];
 
   useEffect(() => {
-    fetchEvents();
-  }, [filter]);
+    fetchInitialData();
+  }, []);
 
-  const fetchEvents = async () => {
+  const fetchInitialData = async () => {
     try {
-      // Simulate API call
-      setTimeout(() => {
-        setEvents(mockEvents);
-      }, 500);
+      const hRes = await fetch("http://localhost:5000/api/hearings");
+      const hData = await hRes.json();
+      const formattedEvents = hData.map(e => ({
+        ...e,
+        start: new Date(e.start),
+        end: new Date(e.end)
+      }));
+      setEvents(formattedEvents);
+
+      const cRes = await fetch("http://localhost:5000/api/cases");
+      const cData = await cRes.json();
+      setAvailableCases(cData);
     } catch (error) {
-      console.error('Error fetching events:', error);
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const handleCaseChange = (e) => {
+    const selectedNum = e.target.value;
+    const caseData = availableCases.find(c => c.caseNumber === selectedNum);
+    if (caseData) {
+      setNewEvent({
+        ...newEvent,
+        caseId: selectedNum,
+        title: `Hearing: ${caseData.title}`,
+        parties: `${caseData.plaintiff}, ${caseData.defendant}`
+      });
+    } else {
+      setNewEvent({ ...newEvent, caseId: selectedNum });
+    }
+  };
+
+  const handleScheduleNewHearing = async () => {
+    if (!newEvent.title || !newEvent.caseId) {
+      alert('Select a Case and Title');
+      return;
+    }
+
+    const payload = {
+      ...newEvent,
+      parties: typeof newEvent.parties === 'string' ? newEvent.parties.split(',').map(p => p.trim()) : []
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/api/hearings/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const saved = await response.json();
+        setEvents(prev => [...prev, { ...saved, start: new Date(saved.start), end: new Date(saved.end) }]);
+        setIsNewEventModalOpen(false);
+        alert('Hearing scheduled successfully!');
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+    }
+  };
+
+  const handleDeleteHearing = async (id) => {
+    if (!window.confirm("Permanently cancel this hearing?")) return;
+    try {
+      const response = await fetch(`http://localhost:5000/api/hearings/${id}`, { method: "DELETE" });
+      if (response.ok) {
+        setEvents(events.filter(ev => ev._id !== id));
+        setSelectedEvent(null);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
     }
   };
 
   const eventStyleGetter = (event) => {
-    let backgroundColor = '#4299e1'; // Default blue
-    let borderColor = '#3182ce';
-
-    switch (event.priority) {
-      case 'High':
-        backgroundColor = '#f56565';
-        borderColor = '#c53030';
-        break;
-      case 'Medium':
-        backgroundColor = '#ed8936';
-        borderColor = '#c05621';
-        break;
-      case 'Low':
-        backgroundColor = '#48bb78';
-        borderColor = '#38a169';
-        break;
-      default:
-        backgroundColor = '#4299e1';
-        borderColor = '#3182ce';
-    }
-
-    if (event.status === 'Completed') {
-      backgroundColor = '#a0aec0';
-      borderColor = '#718096';
-    }
-
-    return {
-      style: {
-        backgroundColor,
-        border: `2px solid ${borderColor}`,
-        borderRadius: '6px',
-        color: 'white',
-        padding: '4px 8px',
-        opacity: 0.9,
-        fontWeight: '500',
-      },
-    };
-  };
-
-  const handleSelectEvent = (event) => {
-    setSelectedEvent(event);
-  };
-
-  const handleSelectSlot = (slotInfo) => {
-    setNewEvent({
-      ...newEvent,
-      start: slotInfo.start,
-      end: slotInfo.end,
-    });
-    setIsNewEventModalOpen(true);
-  };
-
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilter((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const clearFilters = () => {
-    setFilter({
-      judge: '',
-      caseType: '',
-      priority: '',
-      status: '',
-    });
-  };
-
-  const handleNewEventChange = (e) => {
-    const { name, value } = e.target;
-    setNewEvent((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleScheduleNewHearing = () => {
-    if (!newEvent.title || !newEvent.caseId) {
-      alert('Please fill in required fields: Title and Case ID');
-      return;
-    }
-
-    const eventToAdd = {
-      id: events.length + 1,
-      ...newEvent,
-      parties: newEvent.parties.split(',').map(party => party.trim()).filter(party => party !== ''),
-      createdAt: new Date().toISOString(),
-    };
-
-    setEvents((prev) => [...prev, eventToAdd]);
-    setIsNewEventModalOpen(false);
-    
-    // Reset form
-    setNewEvent({
-      title: '',
-      caseId: '',
-      start: new Date(),
-      end: new Date(Date.now() + 2 * 60 * 60 * 1000),
-      judge: '',
-      parties: '',
-      caseType: '',
-      priority: 'Medium',
-      status: 'Scheduled',
-      courtroom: '',
-      description: '',
-    });
-
-    // Show success message
-    alert('New hearing scheduled successfully!');
-  };
-
-  // Event Details Modal
-  const EventDetailsModal = () => {
-    if (!selectedEvent) return null;
-
-    return (
-      <div className="fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-        <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl">
-          <div className="flex justify-between items-center p-6 border-b">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">Case Details</h3>
-              <p className="text-sm text-gray-600 mt-1">{selectedEvent.caseId}</p>
-            </div>
-            <button
-              onClick={() => setSelectedEvent(null)}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-full transition"
-            >
-              <XMarkIcon className="h-6 w-6" />
-            </button>
-          </div>
-
-          <div className="p-6 space-y-6">
-            <div>
-              <h4 className="font-semibold text-xl text-blue-700 mb-2">{selectedEvent.title}</h4>
-              <p className="text-gray-600">{selectedEvent.description}</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <ClockIcon className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-sm text-gray-500">Date & Time</p>
-                  <p className="font-medium">
-                    {moment(selectedEvent.start).format('DD MMM YYYY, hh:mm A')} -{' '}
-                    {moment(selectedEvent.end).format('hh:mm A')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <UserIcon className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-sm text-gray-500">Assigned Judge</p>
-                  <p className="font-medium">{selectedEvent.judge}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <BuildingLibraryIcon className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-sm text-gray-500">Courtroom</p>
-                  <p className="font-medium">{selectedEvent.courtroom}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <TagIcon className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-sm text-gray-500">Priority</p>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    selectedEvent.priority === 'High' ? 'bg-red-100 text-red-800' :
-                    selectedEvent.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
-                    {selectedEvent.priority}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h5 className="font-semibold text-gray-700 mb-3 flex items-center">
-                <UserGroupIcon className="h-5 w-5 mr-2" />
-                Parties Involved
-              </h5>
-              <div className="flex flex-wrap gap-2">
-                {selectedEvent.parties?.map((party, index) => (
-                  <span
-                    key={index}
-                    className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium"
-                  >
-                    {party}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                onClick={() => setSelectedEvent(null)}
-                className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-              >
-                Close
-              </button>
-              <button className="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
-                View Full Case Details
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // New Event Modal
-  const NewEventModal = () => {
-    if (!isNewEventModalOpen) return null;
-
-    return (
-      <div className="fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-        <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-          <div className="sticky top-0 bg-white z-10 p-6 border-b flex justify-between items-center">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">Schedule New Hearing</h3>
-              <p className="text-sm text-gray-600 mt-1">Fill in the details to schedule a new case hearing</p>
-            </div>
-            <button
-              onClick={() => setIsNewEventModalOpen(false)}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-full transition"
-            >
-              <XMarkIcon className="h-6 w-6" />
-            </button>
-          </div>
-
-          <div className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Case Title *
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={newEvent.title}
-                  onChange={handleNewEventChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter case title"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Case ID *
-                </label>
-                <input
-                  type="text"
-                  name="caseId"
-                  value={newEvent.caseId}
-                  onChange={handleNewEventChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., CR/2025/123"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Judge
-                </label>
-                <select
-                  name="judge"
-                  value={newEvent.judge}
-                  onChange={handleNewEventChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select Judge</option>
-                  {judges.map((judge) => (
-                    <option key={judge} value={judge}>{judge}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Case Type
-                </label>
-                <select
-                  name="caseType"
-                  value={newEvent.caseType}
-                  onChange={handleNewEventChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select Case Type</option>
-                  {caseTypes.map((type) => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Priority
-                </label>
-                <select
-                  name="priority"
-                  value={newEvent.priority}
-                  onChange={handleNewEventChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {priorities.map((priority) => (
-                    <option key={priority} value={priority}>{priority}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Status
-                </label>
-                <select
-                  name="status"
-                  value={newEvent.status}
-                  onChange={handleNewEventChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {statuses.map((status) => (
-                    <option key={status} value={status}>{status}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Start Date & Time
-                </label>
-                <input
-                  type="datetime-local"
-                  value={moment(newEvent.start).format('YYYY-MM-DDTHH:mm')}
-                  onChange={(e) => setNewEvent({...newEvent, start: new Date(e.target.value)})}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  End Date & Time
-                </label>
-                <input
-                  type="datetime-local"
-                  value={moment(newEvent.end).format('YYYY-MM-DDTHH:mm')}
-                  onChange={(e) => setNewEvent({...newEvent, end: new Date(e.target.value)})}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Parties Involved (comma separated)
-                </label>
-                <input
-                  type="text"
-                  name="parties"
-                  value={newEvent.parties}
-                  onChange={handleNewEventChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Plaintiff Name, Defendant Name, Third Party"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Courtroom
-                </label>
-                <input
-                  type="text"
-                  name="courtroom"
-                  value={newEvent.courtroom}
-                  onChange={handleNewEventChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Courtroom 3"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Estimated Duration
-                </label>
-                <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                  <option>30 minutes</option>
-                  <option>1 hour</option>
-                  <option>2 hours</option>
-                  <option>Half day</option>
-                  <option>Full day</option>
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description / Notes
-                </label>
-                <textarea
-                  name="description"
-                  value={newEvent.description}
-                  onChange={handleNewEventChange}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows="4"
-                  placeholder="Enter case description, important notes, or special instructions..."
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-3 pt-6 border-t">
-              <button
-                onClick={() => setIsNewEventModalOpen(false)}
-                className="px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleScheduleNewHearing}
-                className="px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition flex items-center space-x-2"
-              >
-                <PlusIcon className="h-5 w-5" />
-                <span>Schedule Hearing</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    let backgroundColor = '#2563eb'; // Default Blue
+    if (event.priority === 'High') backgroundColor = '#dc2626'; // Vivid Red
+    if (event.priority === 'Medium') backgroundColor = '#d97706'; // Amber
+    if (event.priority === 'Low') backgroundColor = '#059669'; // Emerald
+    return { style: { backgroundColor, borderRadius: '10px', color: 'white', border: 'none', padding: '2px 5px' } };
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900">
       <Navbar />
-
-      {/* Main Content */}
-      <div className="p-6 max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Case Schedule & Calendar</h1>
-          <p className="text-gray-600 mt-2">
-            Manage court hearings, track case timelines, and optimize judicial workflow
-          </p>
+      
+      <div className="pt-10 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+          <div>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Hearing Schedule</h1>
+            <p className="text-slate-500 font-medium flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-blue-600" />
+              Manage and track judicial proceedings in real-time
+            </p>
+          </div>
+          <button 
+            onClick={() => setIsNewEventModalOpen(true)} 
+            className="group flex items-center gap-3 bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-2xl shadow-blue-200 transition-all active:scale-95"
+          >
+            <PlusIcon className="h-6 w-6 stroke-[3]" />
+            Schedule Hearing
+          </button>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
-            <div className="flex items-center">
-              <div className="p-3 bg-white/20 rounded-lg">
-                <CalendarIcon className="h-8 w-8" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium opacity-90">Today's Hearings</p>
-                <p className="text-3xl font-bold mt-1">12</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-6 rounded-xl shadow-lg">
-            <div className="flex items-center">
-              <div className="p-3 bg-white/20 rounded-lg">
-                <ExclamationTriangleIcon className="h-8 w-8" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium opacity-90">Urgent Cases</p>
-                <p className="text-3xl font-bold mt-1">5</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
-            <div className="flex items-center">
-              <div className="p-3 bg-white/20 rounded-lg">
-                <CheckCircleIcon className="h-8 w-8" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium opacity-90">Completed Today</p>
-                <p className="text-3xl font-bold mt-1">8</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg">
-            <div className="flex items-center">
-              <div className="p-3 bg-white/20 rounded-lg">
-                <BuildingLibraryIcon className="h-8 w-8" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium opacity-90">Active Courtrooms</p>
-                <p className="text-3xl font-bold mt-1">7</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters Section */}
-        <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-            <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <FunnelIcon className="h-6 w-6 text-blue-600" />
-              <div>
-                <h3 className="font-semibold text-gray-900 text-lg">Schedule Filters</h3>
-                <p className="text-sm text-gray-600">Filter cases by specific criteria</p>
-              </div>
-            </div>
-            <button
-              onClick={clearFilters}
-              className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition"
-            >
-              Clear All Filters
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Judge</label>
-              <select
-                name="judge"
-                value={filter.judge}
-                onChange={handleFilterChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">All Judges</option>
-                {judges.map((judge) => (
-                  <option key={judge} value={judge}>{judge}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Case Type</label>
-              <select
-                name="caseType"
-                value={filter.caseType}
-                onChange={handleFilterChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">All Types</option>
-                {caseTypes.map((type) => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
-              <select
-                name="priority"
-                value={filter.priority}
-                onChange={handleFilterChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">All Priorities</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-              <select
-                name="status"
-                value={filter.status}
-                onChange={handleFilterChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">All Status</option>
-                <option value="Scheduled">Scheduled</option>
-                <option value="Hearing">Hearing</option>
-                <option value="Arguments">Arguments</option>
-                <option value="Mediation">Mediation</option>
-                <option value="Completed">Completed</option>
-                <option value="Adjourned">Adjourned</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Calendar Container */}
-        <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-            <div className="flex space-x-2 mb-4 md:mb-0">
-              <button
-                onClick={() => setView('month')}
-                className={`px-4 py-2 rounded-lg transition ${view === 'month' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-              >
-                Month
-              </button>
-              <button
-                onClick={() => setView('week')}
-                className={`px-4 py-2 rounded-lg transition ${view === 'week' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-              >
-                Week
-              </button>
-              <button
-                onClick={() => setView('day')}
-                className={`px-4 py-2 rounded-lg transition ${view === 'day' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-              >
-                Day
-              </button>
-              <button
-                onClick={() => setView('agenda')}
-                className={`px-4 py-2 rounded-lg transition ${view === 'agenda' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-              >
-                Agenda
-              </button>
-            </div>
-            
-            {/* WORKING BUTTON */}
-            <button 
-              onClick={() => setIsNewEventModalOpen(true)}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg flex items-center space-x-2 font-medium"
-            >
-              <PlusIcon className="h-5 w-5" />
-              <span>Schedule New Hearing</span>
-            </button>
-          </div>
-
-          <div className="h-[600px] border border-gray-200 rounded-lg overflow-hidden">
+        {/* CALENDAR CONTAINER */}
+        <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 p-8 overflow-hidden">
+          <div className="h-[800px] schedule-calendar">
             <Calendar
               localizer={localizer}
               events={events}
               startAccessor="start"
               endAccessor="end"
               style={{ height: '100%' }}
-              onSelectEvent={handleSelectEvent}
-              onSelectSlot={handleSelectSlot}
-              selectable
-              view={view}
-              onView={setView}
               date={date}
-              onNavigate={setDate}
+              onNavigate={(newDate) => setDate(newDate)}
+              view={view}
+              onView={(newView) => setView(newView)}
+              onSelectEvent={(ev) => setSelectedEvent(ev)}
               eventPropGetter={eventStyleGetter}
-              messages={{
-                next: 'Next',
-                previous: 'Previous',
-                today: 'Today',
-                month: 'Month',
-                week: 'Week',
-                day: 'Day',
-                agenda: 'Agenda',
-                date: 'Date',
-                time: 'Time',
-                event: 'Event',
-              }}
-              toolbar={true}
+              popup
+              className="font-sans"
             />
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h4 className="font-semibold text-gray-900 text-lg mb-4">Priority Legend</h4>
-          <div className="flex flex-wrap gap-6">
-            {[
-              { color: 'bg-red-500', label: 'High Priority' },
-              { color: 'bg-orange-500', label: 'Medium Priority' },
-              { color: 'bg-green-500', label: 'Low Priority' },
-              { color: 'bg-blue-500', label: 'Normal Priority' },
-              { color: 'bg-purple-500', label: 'Special Hearing' },
-              { color: 'bg-gray-400', label: 'Completed' },
-            ].map((item, index) => (
-              <div key={index} className="flex items-center">
-                <div className={`w-5 h-5 ${item.color} rounded mr-3`}></div>
-                <span className="text-gray-700">{item.label}</span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
 
-      {/* Modals */}
-      <EventDetailsModal />
-      <NewEventModal />
+      {/* NEW HEARING MODAL (MODERN DESIGN) */}
+      {isNewEventModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-xl p-10 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+            
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-3xl font-black text-slate-900">New Schedule</h3>
+              <button onClick={() => setIsNewEventModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition">
+                <XMarkIcon className="h-7 w-7 text-slate-400" />
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Case Link</label>
+                <select 
+                  className="w-full border-2 border-slate-100 p-4 rounded-2xl bg-slate-50 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-slate-700" 
+                  value={newEvent.caseId} 
+                  onChange={handleCaseChange}
+                >
+                  <option value="">-- Choose Registered Case --</option>
+                  {availableCases.map(c => (
+                    <option key={c._id} value={c.caseNumber}>{c.caseNumber} - {c.title}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Hearing Title</label>
+                <input 
+                  placeholder="e.g. Evidence Presentation" 
+                  className="w-full border-2 border-slate-100 p-4 rounded-2xl bg-slate-50 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold" 
+                  value={newEvent.title} 
+                  onChange={(e) => setNewEvent({...newEvent, title: e.target.value})} 
+                />
+              </div>
 
-      {/* Floating Action Button for Mobile */}
-      <button 
-        onClick={() => setIsNewEventModalOpen(true)}
-        className="md:hidden fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition z-40"
-      >
-        <PlusIcon className="h-6 w-6" />
-      </button>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Priority</label>
+                  <select className="w-full border-2 border-slate-100 p-4 rounded-2xl bg-slate-50 font-bold outline-none" value={newEvent.priority} onChange={(e) => setNewEvent({...newEvent, priority: e.target.value})}>
+                      <option value="High">High Priority</option>
+                      <option value="Medium">Medium Priority</option>
+                      <option value="Low">Low Priority</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Judge</label>
+                  <select className="w-full border-2 border-slate-100 p-4 rounded-2xl bg-slate-50 font-bold outline-none" value={newEvent.judge} onChange={(e) => setNewEvent({...newEvent, judge: e.target.value})}>
+                      <option value="">Select Judge</option>
+                      {judges.map(j => <option key={j} value={j}>{j}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Start Time</label>
+                  <input type="datetime-local" className="w-full border-2 border-slate-100 p-4 rounded-2xl bg-slate-50 font-bold" value={moment(newEvent.start).format('YYYY-MM-DDTHH:mm')} onChange={(e) => setNewEvent({...newEvent, start: new Date(e.target.value)})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">End Time</label>
+                  <input type="datetime-local" className="w-full border-2 border-slate-100 p-4 rounded-2xl bg-slate-50 font-bold" value={moment(newEvent.end).format('YYYY-MM-DDTHH:mm')} onChange={(e) => setNewEvent({...newEvent, end: new Date(e.target.value)})} />
+                </div>
+              </div>
+              
+              <div className="flex gap-4 pt-6">
+                <button onClick={() => setIsNewEventModalOpen(false)} className="flex-1 py-4 rounded-2xl border-2 border-slate-100 text-slate-400 font-black hover:bg-slate-50 transition-all uppercase tracking-widest text-sm">Cancel</button>
+                <button onClick={handleScheduleNewHearing} className="flex-[2] py-4 bg-blue-700 text-white rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-800 transition-all uppercase tracking-widest text-sm">Save Hearing</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DETAILS MODAL (MODERN DESIGN) */}
+      {selectedEvent && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in zoom-in duration-300">
+          <div className="bg-white rounded-[3rem] p-10 w-full max-w-md shadow-2xl relative overflow-hidden border border-slate-100">
+            <div className="flex justify-between items-start mb-8">
+                <div className="space-y-1">
+                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">Hearing Entry</span>
+                    <h3 className="font-black text-3xl text-slate-900 leading-tight">{selectedEvent.title}</h3>
+                    <p className="text-blue-600 font-black text-sm uppercase tracking-tighter">Case Reference: {selectedEvent.caseId}</p>
+                </div>
+                <button onClick={() => handleDeleteHearing(selectedEvent._id)} className="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                    <TrashIcon className="h-6 w-6" />
+                </button>
+            </div>
+
+            <div className="space-y-6 mb-10">
+              <div className="flex items-center gap-5 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="p-3 bg-white rounded-xl shadow-sm"><UserIcon className="h-6 w-6 text-blue-600"/></div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Presiding Judge</p>
+                  <p className="font-black text-slate-700">{selectedEvent.judge || "Unassigned"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-5 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="p-3 bg-white rounded-xl shadow-sm"><ClockIcon className="h-6 w-6 text-emerald-600"/></div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date & Time</p>
+                  <p className="font-black text-slate-700">{moment(selectedEvent.start).format('LLLL')}</p>
+                </div>
+              </div>
+
+              <div className="p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ScaleIcon className="h-4 w-4 text-indigo-600"/>
+                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Parties Involved</p>
+                  </div>
+                  <p className="text-slate-700 font-bold leading-relaxed">{Array.isArray(selectedEvent.parties) ? selectedEvent.parties.join(' • ') : selectedEvent.parties}</p>
+              </div>
+            </div>
+
+            <button onClick={() => setSelectedEvent(null)} className="w-full bg-slate-900 text-white py-5 rounded-[1.5rem] font-black text-lg hover:bg-black transition-all shadow-xl shadow-slate-200">Dismiss</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
