@@ -170,13 +170,13 @@ const Home = () => {
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <Link
+                {/* <Link
                   to="/learn-more"
                   className="px-8 py-3.5 border-2 border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center"
                 >
                   <Play className="h-5 w-5 mr-2" />
                   Learn More
-                </Link>
+                </Link> */}
               </div>
             </div>
             
@@ -230,13 +230,13 @@ const Home = () => {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">{service.title}</h3>
                 <p className="text-gray-600 mb-6">{service.description}</p>
-                <Link 
+                {/* <Link 
                   to={service.title === 'Financial Analysis' ? '/learn-more' : '#'}
                   className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700 group"
                 >
                   Learn More
                   <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-2 transition-transform" />
-                </Link>
+                </Link> */}
               </div>
             ))}
           </div>
@@ -398,12 +398,12 @@ const Home = () => {
               Get Started Now
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
-            <Link
+            {/* <Link
               to="/learn-more"
               className="px-8 py-3.5 border-2 border-white text-white font-medium rounded-lg hover:bg-white/10 transition-colors"
             >
               Learn More
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>
