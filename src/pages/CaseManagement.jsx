@@ -25,8 +25,6 @@ import {
   Menu,
   X
 } from "lucide-react";
-
-/* ---------------- BADGE ---------------- */
 const Badge = ({ children, color }) => {
   const colors = {
     High: "bg-red-100 text-red-700",
@@ -45,7 +43,7 @@ const Badge = ({ children, color }) => {
   );
 };
 
-/* ---------------- NAVBAR COMPONENT ---------------- */
+
 const Navbar = () => {
   const location = useLocation();
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);

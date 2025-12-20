@@ -8,8 +8,7 @@ import Parties from "./pages/Parties";
 import Authpage from "./pages/Authpage";
 import SchedulePage from "./pages/SchedulePage";
 import Learn from "./pages/Learn";
-import Dashboard from "./pages/Dashboard"; // Add this import
-
+import Dashboard from "./pages/Dashboard"; 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 

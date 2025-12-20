@@ -100,9 +100,9 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Right side: Search, Notifications, Profile */}
+       
           <div className="hidden md:flex items-center space-x-4">
-            {/* Search */}
+          
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-blue-300" />
@@ -311,7 +311,6 @@ const CaseTypeDistribution = () => {
   );
 };
 
-// Recent Activity Component
 const RecentActivity = () => {
   const activities = [
     { time: '2 mins ago', action: 'New case filed', case: 'CR/2024/1234', user: 'Court Clerk 1', icon: FileText, color: 'bg-blue-100 text-blue-600' },
@@ -353,8 +352,6 @@ const RecentActivity = () => {
     </div>
   );
 };
-
-// Performance Metrics Component
 const PerformanceMetrics = () => {
   const metrics = [
     { label: 'Case Clearance Rate', value: '92%', target: '95%', status: 'on-track', color: 'bg-green-500' },
