@@ -3,27 +3,19 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Eye,
   FileEdit,
-  MoreVertical,
   Search,
-  Filter,
-  Calendar,
-  User,
   Plus,
   FileText,
-  Clock,
-  AlertCircle,
-  XCircle,
   Scale,
   Home,
   Folder,
   BarChart3,
   Users,
   PieChart,
-  Bell,
-  UserCircle,
-  ChevronDown,
-  Menu,
-  X
+  Trash2,
+  X,
+  Calendar,
+  AlertCircle
 } from "lucide-react";
 const Badge = ({ children, color }) => {
   const colors = {
@@ -42,13 +34,8 @@ const Badge = ({ children, color }) => {
     </span>
   );
 };
-
-
 const Navbar = () => {
   const location = useLocation();
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
   const navigationItems = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'Cases', path: '/cases', icon: Folder },
@@ -64,29 +51,16 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <div className="flex items-center space-x-3">
-              <div className="bg-white p-2 rounded-lg">
-                <Scale className="h-6 w-6 text-blue-900" />
-              </div>
+              <div className="bg-white p-2 rounded-lg"><Scale className="h-6 w-6 text-blue-900" /></div>
               <span className="text-white text-xl font-bold tracking-wider">DCFM</span>
-              <div className="hidden md:block h-6 w-px bg-blue-400 mx-4"></div>
             </div>
-            <div className="hidden md:flex items-center ml-8 space-x-6">
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                      isActive ? 'bg-blue-700 text-white' : 'text-blue-100 hover:bg-blue-700/50 hover:text-white'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{item.name}</span>
-                  </Link>
-                );
-              })}
+            <div className="hidden md:flex items-center ml-8 space-x-4">
+              {navigationItems.map((item) => (
+                <Link key={item.name} to={item.path} className={`flex items-center space-x-1.5 px-3 py-2 rounded-md text-sm font-medium transition-all ${location.pathname === item.path ? 'bg-blue-700 text-white' : 'text-blue-100 hover:bg-blue-700/50'}`}>
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.name}</span>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
@@ -100,150 +74,187 @@ const CaseManagement = () => {
   const [cases, setCases] = useState([]); 
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarFilter, setSidebarFilter] = useState("all");
-  const [isNewCaseModalOpen, setIsNewCaseModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentEditId, setCurrentEditId] = useState(null);
 
-  // UPDATED: Form state now includes 'status'
   const [formData, setFormData] = useState({
-    title: "",
-    category: "CMI",
-    priority: "Medium",
-    status: "Pending", 
-    plaintiff: "",
-    defendant: ""
+    title: "", category: "CMI", priority: "Medium", status: "Pending", plaintiff: "", defendant: ""
   });
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/cases")
-      .then(res => res.json())
-      .then(data => setCases(data))
-      .catch(err => console.error("Error loading cases:", err));
+    fetchCases();
   }, []);
 
-  const handleCreateNewCase = async () => {
+  const fetchCases = () => {
+    fetch("http://localhost:5000/api/cases")
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data)) setCases(data); })
+      .catch(err => console.error("Load error:", err));
+  };
+
+  const handleSaveCase = async () => {
     if (!formData.title || !formData.plaintiff || !formData.defendant) {
-      alert("Please fill in Case Title, Plaintiff, and Defendant.");
+      alert("Please fill in required fields.");
       return;
     }
 
+    const url = isEditing 
+      ? `http://localhost:5000/api/cases/${currentEditId}` 
+      : 'http://localhost:5000/api/cases/create';
+    
+    const method = isEditing ? 'PUT' : 'POST';
+
     try {
-      const response = await fetch('http://localhost:5000/api/cases/create', {
-        method: 'POST',
+      const response = await fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        const savedCase = await response.json();
-        setCases([savedCase, ...cases]); 
-        setIsNewCaseModalOpen(false); 
-        setFormData({ title: "", category: "CMI", priority: "Medium", status: "Pending", plaintiff: "", defendant: "" }); 
+        const result = await response.json();
+        if (isEditing) {
+          // Find the case by ID and update it in the UI list
+          setCases(prev => prev.map(c => c._id === currentEditId ? result : c));
+        } else {
+          setCases(prev => [result, ...prev]);
+        }
+        closeModal();
       } else {
-        alert("Failed to save to database");
+        alert("Failed to save case. Check server logs.");
       }
     } catch (error) {
-      console.error("Connection Error:", error);
+      console.error("Save Error:", error);
     }
   };
 
+  const handleDeleteCase = async (id) => {
+    if (!window.confirm("Permanently delete this case from the database?")) return;
+    try {
+      const res = await fetch(`http://localhost:5000/api/cases/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setCases(cases.filter(c => c._id !== id));
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const openEditModal = (c) => {
+    setIsEditing(true);
+    setCurrentEditId(c._id);
+    setFormData({ 
+      title: c.title, 
+      category: c.category, 
+      priority: c.priority, 
+      status: c.status, 
+      plaintiff: c.plaintiff, 
+      defendant: c.defendant 
+    });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setIsEditing(false);
+    setCurrentEditId(null);
+    setFormData({ title: "", category: "CMI", priority: "Medium", status: "Pending", plaintiff: "", defendant: "" });
+  };
+
+  // Restored Priority Counts for Sidebar
+  const counts = useMemo(() => ({
+    all: cases.length,
+    high: cases.filter(c => c.priority === "High").length,
+    medium: cases.filter(c => c.priority === "Medium").length,
+    low: cases.filter(c => c.priority === "Low").length
+  }), [cases]);
+
   const filteredCases = useMemo(() => {
     return cases.filter((c) => {
-      if (sidebarFilter === "high" && c.priority !== "High") return false;
-      if (sidebarFilter === "medium" && c.priority !== "Medium") return false;
-      if (sidebarFilter === "low" && c.priority !== "Low") return false;
-      if (sidebarFilter === "workable" && c.status !== "In Progress") return false;
-      if (sidebarFilter === "archived" && c.status !== "Adjourned") return false;
+      if (sidebarFilter !== "all" && c.priority.toLowerCase() !== sidebarFilter) return false;
       if (searchQuery && !c.title.toLowerCase().includes(searchQuery.toLowerCase()) && !c.caseNumber.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       return true;
     });
   }, [cases, sidebarFilter, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-
       <div className="pt-8 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex gap-6">
-          {/* SIDEBAR WITH UPDATED COUNTS */}
-          <aside className="w-64 bg-white rounded-2xl shadow-lg p-4 h-fit sticky top-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-800">Cases</h3>
-              <div className="text-xl font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">{cases.length}</div>
-            </div>
-            
-            <div className="space-y-2">
-              <button onClick={() => setSidebarFilter("all")} className={`w-full px-4 py-3 rounded-xl text-left flex items-center gap-3 ${sidebarFilter === "all" ? "bg-blue-600 text-white shadow-lg" : "hover:bg-gray-50 border border-gray-200"}`}>
-                📂 <span className="font-medium">All Cases</span>
-              </button>
-
-              <button onClick={() => setIsNewCaseModalOpen(true)} className="w-full px-4 py-3 rounded-xl text-left flex items-center gap-3 transition-all hover:bg-emerald-50 border border-emerald-200">
-                <Plus className="h-4 w-4 text-emerald-600" /> <span className="font-medium text-emerald-700">New Case</span>
-              </button>
-
-              {/* High Priority */}
-              <button onClick={() => setSidebarFilter("high")} className={`w-full px-4 py-3 rounded-xl text-left flex items-center gap-3 ${sidebarFilter === "high" ? "bg-red-600 text-white shadow-lg" : "hover:bg-red-50 border border-red-200"}`}>
-                🔥 <span className="font-medium">High Priority</span>
-                <span className="ml-auto text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
-                   {cases.filter(c => c.priority === "High").length}
-                </span>
-              </button>
-
-              {/* Medium Priority */}
-              <button onClick={() => setSidebarFilter("medium")} className={`w-full px-4 py-3 rounded-xl text-left flex items-center gap-3 ${sidebarFilter === "medium" ? "bg-yellow-500 text-white shadow-lg" : "hover:bg-yellow-50 border border-yellow-200"}`}>
-                ⚠️ <span className="font-medium">Medium Priority</span>
-                <span className="ml-auto text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-                   {cases.filter(c => c.priority === "Medium").length}
-                </span>
-              </button>
-
-              {/* Low Priority */}
-              <button onClick={() => setSidebarFilter("low")} className={`w-full px-4 py-3 rounded-xl text-left flex items-center gap-3 ${sidebarFilter === "low" ? "bg-blue-500 text-white shadow-lg" : "hover:bg-blue-50 border border-blue-200"}`}>
-                💧 <span className="font-medium">Low Priority</span>
-                <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                   {cases.filter(c => c.priority === "Low").length}
-                </span>
-              </button>
-            </div>
-          </aside>
-
-          {/* MAIN TABLE */}
-          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Case Management</h1>
-            <div className="flex gap-4 mb-6">
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none" />
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* SIDEBAR WITH PRIORITY COUNTS */}
+          <aside className="w-full lg:w-72 space-y-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Navigation</h3>
+              <div className="space-y-2">
+                <button onClick={() => setSidebarFilter("all")} className={`w-full px-4 py-3 rounded-xl text-left flex items-center justify-between transition-all ${sidebarFilter === "all" ? "bg-blue-600 text-white shadow-md" : "hover:bg-gray-50 text-gray-700"}`}>
+                  <div className="flex items-center gap-3"><Folder size={18}/> <span>All Cases</span></div>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${sidebarFilter === "all" ? "bg-blue-400 text-white" : "bg-gray-100 text-gray-500"}`}>{counts.all}</span>
+                </button>
+                <button onClick={() => { setIsEditing(false); setIsModalOpen(true); }} className="w-full px-4 py-3 rounded-xl bg-emerald-600 text-white font-bold flex items-center gap-3 shadow-lg hover:bg-emerald-700 transition">
+                  <Plus size={20}/> New Case Registry
+                </button>
               </div>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Priority Filters</h3>
+              <div className="space-y-2">
+                {[
+                  { id: 'high', label: 'High Priority', color: 'text-red-600', bg: 'bg-red-50', count: counts.high },
+                  { id: 'medium', label: 'Medium Priority', color: 'text-amber-600', bg: 'bg-amber-50', count: counts.medium },
+                  { id: 'low', label: 'Low Priority', color: 'text-blue-600', bg: 'bg-blue-50', count: counts.low }
+                ].map((p) => (
+                  <button key={p.id} onClick={() => setSidebarFilter(p.id)} className={`w-full px-4 py-3 rounded-xl text-left flex items-center justify-between transition-all ${sidebarFilter === p.id ? 'ring-2 ring-offset-1 ring-blue-500 bg-white shadow-sm' : 'hover:bg-gray-50'}`}>
+                    <div className="flex items-center gap-3"><AlertCircle className={`h-4 w-4 ${p.color}`}/> <span className="font-medium text-gray-700">{p.label}</span></div>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.bg} ${p.color}`}>{p.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          {/* MAIN CONTENT AREA */}
+          <div className="flex-1 space-y-6">
+            <div className="relative group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={20} />
+              <input type="text" placeholder="Search case or parties..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-14 pr-6 py-5 bg-white border border-gray-200 rounded-3xl shadow-sm outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all text-lg" />
+            </div>
+
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
               <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-50 border-b">
-                    <th className="text-left py-4 px-6 font-bold text-gray-700">Case Details</th>
-                    <th className="text-left py-4 px-6 font-bold text-gray-700">Priority</th>
-                    <th className="text-left py-4 px-6 font-bold text-gray-700">Status</th>
-                    <th className="text-left py-4 px-6 font-bold text-gray-700">Actions</th>
+                <thead className="bg-gray-50/50 border-b border-gray-100">
+                  <tr>
+                    <th className="text-left p-6 text-xs font-black text-gray-400 uppercase tracking-widest">Case Information</th>
+                    <th className="text-left p-6 text-xs font-black text-gray-400 uppercase tracking-widest">Status & Priority</th>
+                    <th className="text-center p-6 text-xs font-black text-gray-400 uppercase tracking-widest">Manage</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-50">
                   {filteredCases.map((c) => (
-                    <tr key={c._id || c.id} className="border-b hover:bg-gray-50/50">
-                      <td className="py-4 px-6">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2.5 rounded-lg bg-blue-50"><FileText className="h-5 w-5 text-blue-500" /></div>
+                    <tr key={c._id} className="hover:bg-blue-50/20 transition-colors group">
+                      <td className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="mt-1 p-3 bg-blue-50 rounded-2xl group-hover:bg-white transition-colors"><FileText className="h-6 w-6 text-blue-600" /></div>
                           <div>
-                            <div className="font-bold text-blue-600">{c.caseNumber}</div>
-                            <div className="font-semibold text-gray-900">{c.title}</div>
-                            <div className="text-sm text-gray-500">{c.plaintiff} vs {c.defendant}</div>
+                            <div className="text-xs font-black text-blue-600 mb-1">{c.caseNumber}</div>
+                            <div className="text-xl font-bold text-gray-900 mb-1">{c.title}</div>
+                            <div className="text-sm text-gray-500 font-medium">
+                              <span className="text-blue-800">{c.plaintiff}</span> vs <span className="text-purple-800">{c.defendant}</span>
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-6"><Badge color={c.priority}>{c.priority}</Badge></td>
-                      <td className="py-4 px-6"><Badge color={c.status}>{c.status}</Badge></td>
-                      <td className="py-4 px-6">
-                        <div className="flex gap-2">
-                          <button className="p-2 hover:bg-blue-50 rounded-lg text-blue-600"><Eye className="h-5 w-5" /></button>
-                          <button className="p-2 hover:bg-emerald-50 rounded-lg text-emerald-600"><FileEdit className="h-5 w-5" /></button>
+                      <td className="p-6">
+                        <div className="flex flex-col gap-2">
+                          <Badge color={c.priority}>{c.priority} Priority</Badge>
+                          <Badge color={c.status}>{c.status}</Badge>
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="flex justify-center gap-2">
+                          <button onClick={() => openEditModal(c)} className="p-3 text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all" title="Edit Case"><FileEdit size={22}/></button>
+                          <button onClick={() => handleDeleteCase(c._id)} className="p-3 text-red-500 hover:bg-red-50 rounded-2xl transition-all" title="Delete Case"><Trash2 size={22}/></button>
                         </div>
                       </td>
                     </tr>
@@ -255,56 +266,51 @@ const CaseManagement = () => {
         </div>
       </div>
 
-      {/* NEW CASE MODAL WITH STATUS SELECTION */}
-      {isNewCaseModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Create New Case</h2>
-            <div className="space-y-4">
+      {/* MODAL - REGISTER / EDIT */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-blue-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[40px] w-full max-w-xl p-10 relative shadow-2xl">
+            <h2 className="text-3xl font-black text-gray-900 mb-2">{isEditing ? "Modify Case" : "Register Case"}</h2>
+            <p className="text-gray-500 mb-8 font-medium">Please provide the details below.</p>
+            
+            <div className="space-y-5">
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Case Title</label>
-                <input type="text" placeholder="Case Title" className="w-full p-2 border rounded" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+                <label className="text-xs font-black text-gray-400 uppercase ml-1">Case Title</label>
+                <input placeholder="Enter title..." className="w-full p-4 border-2 border-gray-100 rounded-2xl bg-gray-50 focus:border-blue-500 outline-none font-bold" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
-                  <select className="w-full p-2 border rounded" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
-                    <option value="CMI">CMI</option><option value="Criminal">Criminal</option><option value="Family">Family</option>
+                  <label className="text-xs font-black text-gray-400 uppercase ml-1">Category</label>
+                  <select className="w-full p-4 border-2 border-gray-100 rounded-2xl bg-gray-50 focus:border-blue-500 outline-none font-bold" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})}>
+                    <option value="CMI">Civil (CMI)</option><option value="Criminal">Criminal</option><option value="Family">Family</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Priority</label>
-                  <select className="w-full p-2 border rounded" value={formData.priority} onChange={(e) => setFormData({...formData, priority: e.target.value})}>
+                  <label className="text-xs font-black text-gray-400 uppercase ml-1">Priority</label>
+                  <select className="w-full p-4 border-2 border-gray-100 rounded-2xl bg-gray-50 focus:border-blue-500 outline-none font-bold" value={formData.priority} onChange={(e) => setFormData({...formData, priority: e.target.value})}>
                     <option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option>
                   </select>
                 </div>
               </div>
 
-              {/* NEW STATUS SELECTION FIELD */}
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Case Status</label>
-                <select 
-                  className="w-full p-2 border rounded bg-white" 
-                  value={formData.status} 
-                  onChange={(e) => setFormData({...formData, status: e.target.value})}
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="In Progress">Ongoing</option>
-                  <option value="Scheduled">Scheduled</option>
-                  <option value="Adjourned">Adjourned</option>
-                  <option value="Completed">Completed</option>
+                <label className="text-xs font-black text-gray-400 uppercase ml-1">Current Status</label>
+                <select className="w-full p-4 border-2 border-gray-100 rounded-2xl bg-gray-50 focus:border-blue-500 outline-none font-bold" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
+                  <option value="Pending">Pending</option><option value="In Progress">Ongoing</option><option value="Scheduled">Scheduled</option><option value="Completed">Completed</option>
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <input type="text" placeholder="Plaintiff" className="w-full p-2 border rounded" value={formData.plaintiff} onChange={(e) => setFormData({...formData, plaintiff: e.target.value})} />
-                <input type="text" placeholder="Defendant" className="w-full p-2 border rounded" value={formData.defendant} onChange={(e) => setFormData({...formData, defendant: e.target.value})} />
+              <div className="grid grid-cols-2 gap-4">
+                <input placeholder="Petitioner" className="w-full p-4 border-2 border-gray-100 rounded-2xl bg-gray-50 font-bold" value={formData.plaintiff} onChange={(e) => setFormData({...formData, plaintiff: e.target.value})} />
+                <input placeholder="Respondent" className="w-full p-4 border-2 border-gray-100 rounded-2xl bg-gray-50 font-bold" value={formData.defendant} onChange={(e) => setFormData({...formData, defendant: e.target.value})} />
               </div>
-
-              <div className="flex justify-end gap-2 mt-4">
-                <button onClick={() => setIsNewCaseModalOpen(false)} className="px-4 py-2 border rounded text-gray-600">Cancel</button>
-                <button onClick={handleCreateNewCase} className="px-4 py-2 bg-blue-600 text-white rounded font-bold shadow-lg hover:bg-blue-700">Create Case</button>
+              
+              <div className="flex gap-3 pt-4">
+                <button onClick={closeModal} className="flex-1 py-4 border-2 border-gray-100 text-gray-400 rounded-2xl font-black hover:bg-gray-50 uppercase text-sm">Cancel</button>
+                <button onClick={handleSaveCase} className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg hover:bg-blue-700 uppercase text-sm">
+                  {isEditing ? "Save Changes" : "Confirm Entry"}
+                </button>
               </div>
             </div>
           </div>

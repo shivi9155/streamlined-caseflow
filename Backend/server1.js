@@ -29,13 +29,29 @@ const caseSchema = new mongoose.Schema({
   title: { type: String, required: true },
   category: { type: String, required: true },
   priority: { type: String, required: true },
-  status: { type: String, required: true }, // Changed: required instead of default
+  status: { type: String, required: true },
   plaintiff: { type: String, required: true },
   defendant: { type: String, required: true },
   filedDate: { type: String, default: () => new Date().toISOString().split('T')[0] },
   nextHearing: { type: String, default: null }
 });
 const Case = mongoose.model('Case', caseSchema);
+
+// Hearing Schema (For Schedule Page)
+const hearingSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  caseId: { type: String, required: true }, // Links to Case.caseNumber
+  start: { type: Date, required: true },
+  end: { type: Date, required: true },
+  judge: String,
+  parties: [String], 
+  caseType: String,
+  priority: { type: String, default: 'Medium' },
+  status: { type: String, default: 'Scheduled' },
+  courtroom: String,
+  description: String,
+});
+const Hearing = mongoose.model('Hearing', hearingSchema);
 
 // --- 4. Routes ---
 
@@ -74,12 +90,10 @@ app.post('/api/auth/login', async (req, res) => {
 
 /** CASE MANAGEMENT ROUTES **/
 
-// Create a new case
+// Create Case
 app.post('/api/cases/create', async (req, res) => {
   try {
-    // Destructured 'status' from req.body so it can be saved
     const { title, category, priority, status, plaintiff, defendant } = req.body;
-
     const prefixes = { 'CMI': 'CTV', 'Criminal': 'CRV', 'Family': 'FAW', 'Commercial': 'TCM', 'Civil': 'CIV' };
     const prefix = prefixes[category] || 'CAS';
     const year = new Date().getFullYear();
@@ -87,13 +101,7 @@ app.post('/api/cases/create', async (req, res) => {
     const caseNumber = `${prefix}/${year}/${randomNum}`;
 
     const newCase = new Case({
-      caseNumber,
-      title,
-      category,
-      priority,
-      status, // Now saves the status selected in the React Modal
-      plaintiff,
-      defendant
+      caseNumber, title, category, priority, status, plaintiff, defendant
     });
 
     const savedCase = await newCase.save();
@@ -102,41 +110,69 @@ app.post('/api/cases/create', async (req, res) => {
     res.status(500).json({ message: "Error saving case", error: error.message });
   }
 });
-/** 1. DELETE A CASE (AND ITS PARTIES) **/
-app.delete('/api/cases/:id', async (req, res) => {
-  try {
-    const deletedCase = await Case.findByIdAndDelete(req.params.id);
-    if (!deletedCase) {
-      return res.status(404).json({ message: "Case not found" });
-    }
-    res.json({ message: "Case and associated parties removed successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting case", error: error.message });
-  }
-});
 
-/** 2. UPDATE PARTY DETAILS (Optional but Recommended) **/
-// This allows you to update specific fields like phone or email
+// --- NEW: Update Case (Save Changes) ---
 app.put('/api/cases/:id', async (req, res) => {
   try {
     const updatedCase = await Case.findByIdAndUpdate(
       req.params.id, 
       req.body, 
-      { new: true } // returns the updated document
+      { new: true } // Returns the modified document instead of the original
     );
+    if (!updatedCase) return res.status(404).json({ message: "Case not found" });
     res.json(updatedCase);
   } catch (error) {
-    res.status(500).json({ message: "Error updating case details", error: error.message });
+    res.status(500).json({ message: "Update failed", error: error.message });
   }
 });
 
-// Fetch all cases
+// Delete Case
+app.delete('/api/cases/:id', async (req, res) => {
+  try {
+    await Case.findByIdAndDelete(req.params.id);
+    res.json({ message: "Case removed successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get All Cases
 app.get('/api/cases', async (req, res) => {
   try {
     const allCases = await Case.find().sort({ filedDate: -1 });
     res.json(allCases);
   } catch (error) {
     res.status(500).json({ message: "Error fetching cases" });
+  }
+});
+
+/** HEARING/SCHEDULE ROUTES **/
+
+app.get('/api/hearings', async (req, res) => {
+  try {
+    const hearings = await Hearing.find().sort({ start: 1 });
+    res.json(hearings);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching hearings" });
+  }
+});
+
+app.post('/api/hearings/create', async (req, res) => {
+  try {
+    const newHearing = new Hearing(req.body);
+    const savedHearing = await newHearing.save();
+    res.status(201).json(savedHearing);
+  } catch (error) {
+    res.status(500).json({ message: "Error scheduling hearing", error: error.message });
+  }
+});
+
+app.delete('/api/hearings/:id', async (req, res) => {
+  try {
+    await Hearing.findByIdAndDelete(req.params.id);
+    res.json({ message: "Hearing cancelled successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
